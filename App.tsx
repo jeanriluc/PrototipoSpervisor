@@ -26,6 +26,15 @@ import ShiftReport from './components/ShiftReport';
 import NewTicketModal from './components/NewTicketModal';
 import AgentSlideOver from './components/AgentSlideOver';
 
+export interface Notification {
+  id: string;
+  type: 'alert' | 'info' | 'success';
+  title: string;
+  message: string;
+  timestamp: string;
+  isRead: boolean;
+}
+
 const INITIAL_SLA: SLAConfig[] = [
   { priority: 'Urgent', timeLimit: 1440 },
   { priority: 'High', timeLimit: 2880 },
@@ -39,7 +48,7 @@ const getRelativeDate = (hours: number) => {
 };
 
 const INITIAL_TICKETS: Ticket[] = [
-  // Alice Freeman - Client 1 History
+  // CLIENT 1: Alice Freeman (3 Tickets)
   { 
     id: 'TK-1001', client: 'Alice Freeman', email: 'alice@freeman.com', subject: 'CRITICAL: Database Connection Timeout', 
     priority: 'Urgent', slaDeadline: getRelativeDate(-2), assignedAgentId: 'a1', status: 'Open', frustrationLevel: 10, 
@@ -57,18 +66,17 @@ const INITIAL_TICKETS: Ticket[] = [
     internalNotes: [], createdAt: getRelativeDate(-15)
   },
 
-  // Robert Downy - Client 2 History
+  // CLIENT 2: Robert Downy (3 Tickets)
   { id: 'TK-1002', client: 'Robert Downy', email: 'rdj@stark.com', subject: 'API Integration Auth Error', priority: 'High', slaDeadline: getRelativeDate(46), assignedAgentId: 'a1', status: 'Open', frustrationLevel: 7, internalNotes: [], createdAt: getRelativeDate(-2) },
   { id: 'TK-1023', client: 'Robert Downy', email: 'rdj@stark.com', subject: 'Sandbox environment access', priority: 'Low', slaDeadline: getRelativeDate(-20), assignedAgentId: null, status: 'Closed', frustrationLevel: 3, internalNotes: [], createdAt: getRelativeDate(-30) },
+  { id: 'TK-1030', client: 'Robert Downy', email: 'rdj@stark.com', subject: 'Legacy: Dashboard loading slow', priority: 'Low', slaDeadline: getRelativeDate(-500), assignedAgentId: 'a1', status: 'Closed', frustrationLevel: 5, internalNotes: [], createdAt: getRelativeDate(-600) },
 
-  // Sarah Connor - Client 3 History (actually Bruce Wayne requested)
-  { id: 'TK-1003', client: 'Sarah Connor', email: 'sarah@res.net', subject: 'Skynet login loop issues', priority: 'Urgent', slaDeadline: getRelativeDate(22), assignedAgentId: 'a2', status: 'Open', frustrationLevel: 8, internalNotes: [], createdAt: getRelativeDate(-1) },
-  
-  // Bruce Wayne - Client 3 History
+  // CLIENT 3: Bruce Wayne (3 Tickets)
   { id: 'TK-1004', client: 'Bruce Wayne', email: 'bruce@wayne.com', subject: 'Batmobile part replacement', priority: 'Low', slaDeadline: getRelativeDate(70), assignedAgentId: 'a11', status: 'Open', frustrationLevel: 2, internalNotes: [], createdAt: getRelativeDate(-2) },
   { id: 'TK-1024', client: 'Bruce Wayne', email: 'bruce@wayne.com', subject: 'Armor plate recalibration', priority: 'High', slaDeadline: getRelativeDate(-5), assignedAgentId: null, status: 'Closed', frustrationLevel: 1, internalNotes: [], createdAt: getRelativeDate(-10) },
   { id: 'TK-1025', client: 'Bruce Wayne', email: 'bruce@wayne.com', subject: 'Batarang bulk order issue', priority: 'Low', slaDeadline: getRelativeDate(-100), assignedAgentId: null, status: 'Closed', frustrationLevel: 5, internalNotes: [], createdAt: getRelativeDate(-120) },
 
+  { id: 'TK-1003', client: 'Sarah Connor', email: 'sarah@res.net', subject: 'Skynet login loop issues', priority: 'Urgent', slaDeadline: getRelativeDate(22), assignedAgentId: 'a2', status: 'Open', frustrationLevel: 8, internalNotes: [], createdAt: getRelativeDate(-1) },
   { id: 'TK-1005', client: 'Peter Parker', email: 'spidey@nyc.gov', subject: 'Web-fluid subscription renewal', priority: 'Low', slaDeadline: getRelativeDate(71), assignedAgentId: 'a11', status: 'Open', frustrationLevel: 4, internalNotes: [], createdAt: getRelativeDate(-1) },
   { id: 'TK-1006', client: 'Diana Prince', email: 'diana@themyscira.io', subject: 'Lasso of truth calibration', priority: 'High', slaDeadline: getRelativeDate(45), assignedAgentId: 'a12', status: 'Open', frustrationLevel: 3, internalNotes: [], createdAt: getRelativeDate(-3) },
   { id: 'TK-1007', client: 'Tony Stark', email: 'tony@stark.com', subject: 'Arc reactor humming noise', priority: 'Urgent', slaDeadline: getRelativeDate(20), assignedAgentId: 'a4', status: 'Pending', frustrationLevel: 5, internalNotes: [], createdAt: getRelativeDate(-4) },
@@ -88,7 +96,7 @@ const INITIAL_TICKETS: Ticket[] = [
 ];
 
 const INITIAL_AGENTS: Agent[] = [
-  { id: 'a1', name: 'Sofia Martinez', status: 'Online', assignedTickets: ['TK-1001', 'TK-1002'], avatar: 'https://picsum.photos/seed/sofia/100', team: 'RA' },
+  { id: 'a1', name: 'Sofia Martinez', status: 'Online', assignedTickets: ['TK-1001', 'TK-1002', 'TK-1030'], avatar: 'https://picsum.photos/seed/sofia/100', team: 'RA' },
   { id: 'a2', name: 'James Wilson', status: 'Online', assignedTickets: ['TK-1003'], avatar: 'https://picsum.photos/seed/james/100', team: 'PROCON' },
   { id: 'a11', name: 'Lucas Silva', status: 'Online', assignedTickets: ['TK-1004', 'TK-1005', 'TK-1022'], avatar: 'https://picsum.photos/seed/lucas/100', team: 'RA' },
   { id: 'a12', name: 'Ana Oliveira', status: 'Busy', assignedTickets: ['TK-1006'], avatar: 'https://picsum.photos/seed/ana/100', team: 'PROCON' },
@@ -102,11 +110,39 @@ const INITIAL_AGENTS: Agent[] = [
   { id: 'a10', name: 'Chloe Dubois', status: 'Busy', assignedTickets: ['TK-1018', 'TK-1019', 'TK-1020'], avatar: 'https://picsum.photos/seed/chloe/100', team: 'Email' },
 ];
 
+const INITIAL_NOTIFICATIONS: Notification[] = [
+  {
+    id: 'notif-1',
+    type: 'alert',
+    title: 'SLA Breach: TK-1001',
+    message: 'Alice Freeman\'s ticket has exceeded the Urgent SLA limit.',
+    timestamp: getRelativeDate(-0.5),
+    isRead: false,
+  },
+  {
+    id: 'notif-2',
+    type: 'info',
+    title: 'New Case Assigned',
+    message: 'You have been assigned to TK-1007 (Tony Stark).',
+    timestamp: getRelativeDate(-1),
+    isRead: false,
+  },
+  {
+    id: 'notif-3',
+    type: 'success',
+    title: 'Case Resolved',
+    message: 'TK-1024 has been successfully closed.',
+    timestamp: getRelativeDate(-2),
+    isRead: true,
+  }
+];
+
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<View>('inbox');
   const [tickets, setTickets] = useState<Ticket[]>(INITIAL_TICKETS);
   const [agents, setAgents] = useState<Agent[]>(INITIAL_AGENTS);
   const [slaConfigs, setSlaConfigs] = useState<SLAConfig[]>(INITIAL_SLA);
+  const [notifications, setNotifications] = useState<Notification[]>(INITIAL_NOTIFICATIONS);
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
   const [rootTicketId, setRootTicketId] = useState<string | null>(null);
   const [viewingAgentId, setViewingAgentId] = useState<string | null>(null);
@@ -166,6 +202,20 @@ const App: React.FC = () => {
       }
       return { ...a, assignedTickets: newTickets };
     }));
+
+    // Generate notification for assignment
+    if (agentId) {
+      const agentName = agents.find(a => a.id === agentId)?.name;
+      const newNotif: Notification = {
+        id: `notif-${Date.now()}`,
+        type: 'info',
+        title: 'Ticket Reassigned',
+        message: `${ticketId} has been moved to ${agentName}.`,
+        timestamp: new Date().toISOString(),
+        isRead: false,
+      };
+      setNotifications(prev => [newNotif, ...prev]);
+    }
   };
 
   const handleUpdateTicket = (ticketId: string, updates: Partial<Ticket>) => {
@@ -181,11 +231,33 @@ const App: React.FC = () => {
       handleAssignTicket(newTicket.id, newTicket.assignedAgentId);
     }
     setIsNewTicketModalOpen(false);
+    
+    // Notify about new ticket
+    const newNotif: Notification = {
+      id: `notif-${Date.now()}`,
+      type: 'info',
+      title: 'New Ticket Created',
+      message: `${newTicket.id} for ${newTicket.client} is now active.`,
+      timestamp: new Date().toISOString(),
+      isRead: false,
+    };
+    setNotifications(prev => [newNotif, ...prev]);
   };
 
   const handleCloseTicket = (id: string) => {
     setTickets(prev => prev.map(t => t.id === id ? { ...t, status: 'Closed' } : t));
     handleAssignTicket(id, null);
+
+    // Notify about resolution
+    const newNotif: Notification = {
+      id: `notif-${Date.now()}`,
+      type: 'success',
+      title: 'Case Resolved',
+      message: `Ticket ${id} has been marked as closed.`,
+      timestamp: new Date().toISOString(),
+      isRead: false,
+    };
+    setNotifications(prev => [newNotif, ...prev]);
   };
 
   const handleAddNote = (ticketId: string, noteContent: string, newStatus?: Ticket['status']) => {
@@ -222,8 +294,16 @@ const App: React.FC = () => {
     ));
 
     if (finalStatus === 'Closed' && ticket.assignedAgentId) {
-      handleAssignTicket(ticketId, null);
+      handleCloseTicket(ticketId);
     }
+  };
+
+  const markNotificationRead = (id: string) => {
+    setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
+  };
+
+  const clearNotifications = () => {
+    setNotifications([]);
   };
 
   return (
@@ -235,6 +315,9 @@ const App: React.FC = () => {
           searchQuery={searchQuery} 
           setSearchQuery={setSearchQuery} 
           onNewTicket={() => setIsNewTicketModalOpen(true)}
+          notifications={notifications}
+          onMarkRead={markNotificationRead}
+          onClear={clearNotifications}
         />
 
         <div className="flex-1 overflow-hidden p-8 bg-orange-50/20 min-h-0 relative flex gap-6">
@@ -335,7 +418,7 @@ const App: React.FC = () => {
             )}
           </div>
 
-          {/* Global Case View Panel - Sidebar style for Inbox */}
+          {/* Sidebar Case View for Inbox */}
           {activeTab === 'inbox' && selectedTicket && (
             <div className="h-full w-[450px] shrink-0 animate-in slide-in-from-right duration-300 z-40">
               <Customer360 
@@ -354,14 +437,14 @@ const App: React.FC = () => {
         </div>
       </main>
 
-      {/* GLOBAL CASE MODAL (Shows over SlideOvers or other tabs) */}
+      {/* GLOBAL CASE MODAL (Floating Modal with Fix for Clipping) */}
       {activeTab !== 'inbox' && selectedTicket && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-end p-6 bg-slate-900/10 backdrop-blur-sm animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-[100] flex items-center justify-end p-10 bg-slate-900/10 backdrop-blur-sm animate-in fade-in duration-300">
            <div 
              className="absolute inset-0" 
              onClick={() => setSelectedTicketId(null)} 
            />
-           <div className="relative w-full max-w-xl h-full animate-in slide-in-from-right duration-500 shadow-2xl rounded-[2.5rem] overflow-hidden">
+           <div className="relative w-full max-w-xl h-full animate-in slide-in-from-right duration-500 shadow-2xl rounded-[3rem] overflow-hidden bg-white border border-slate-100">
              <Customer360 
                 ticket={selectedTicket} 
                 allTickets={tickets} 

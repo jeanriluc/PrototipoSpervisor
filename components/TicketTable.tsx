@@ -101,8 +101,8 @@ const TicketTable: React.FC<TicketTableProps> = ({ tickets, agents, selectedTick
   };
 
   return (
-    <div className="bg-white rounded-[2.5rem] overflow-hidden border border-slate-100 shadow-sm flex-1">
-      <div className="overflow-x-auto overflow-y-visible">
+    <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm flex-1 mb-32">
+      <div className="w-full">
         <table className="w-full border-collapse min-w-[800px]">
           <thead>
             <tr className="bg-white border-b border-slate-50">
@@ -216,12 +216,14 @@ const TicketTable: React.FC<TicketTableProps> = ({ tickets, agents, selectedTick
                       )}
                     </td>
                     <td className="px-6 py-5" onClick={(e) => e.stopPropagation()}>
-                      <AgentSelector 
-                        agents={agents}
-                        selectedAgentId={ticket.assignedAgentId}
-                        onSelect={(id) => onAssign(ticket.id, id)}
-                        placeholder="Unassigned"
-                      />
+                      <div className="relative">
+                        <AgentSelector 
+                          agents={agents}
+                          selectedAgentId={ticket.assignedAgentId}
+                          onSelect={(id) => onAssign(ticket.id, id)}
+                          placeholder="Unassigned"
+                        />
+                      </div>
                     </td>
                     <td className="px-6 py-5 text-right">
                       <button className="p-2 text-slate-300 hover:text-indigo-600 transition-colors">
